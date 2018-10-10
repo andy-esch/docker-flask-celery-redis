@@ -2,6 +2,7 @@ from flask import Flask
 from flask import url_for
 from worker import celery
 import celery.states as states
+import logging
 
 app = Flask(__name__)
 
@@ -14,10 +15,35 @@ def add(param1, param2):
     return response
 
 
+@app.route('/hive')
+def hive():
+    username = request.args.get('user')
+    key = request.args.get('key')
+    database = request.args.get('database')
+    table = request.args.get('table')
+
+    logging.info(
+            "New data transfer request received with details: {username}, "
+            "{key}, {database}, {table}".format(
+                username=username, key=key, database=database, table=table
+            )
+        )
+
+    task = celery.send_task(
+            'tasks.hive2carto',
+            args=[database, table, username, key],
+            kwargs={}
+        )
+    return jsonify({
+        'status': 'pending',
+        'task_id': task.id,
+        'status_url': url=url_for('check_task', task_id=task.id, external=True)
+    })
+
 @app.route('/check/<string:task_id>')
 def check_task(task_id):
     res = celery.AsyncResult(task_id)
     if res.state == states.PENDING:
-        return res.state
+        return jsonify({'state': res.state})
     else:
-        return str(res.result)
+        return jsonify({'state': res.state, 'table_name': res.result})
