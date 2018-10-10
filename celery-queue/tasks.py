@@ -4,6 +4,8 @@ import time
 from celery import Celery
 import pyodbc
 from requests import Session
+import pandas
+import carto
 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379'),
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
@@ -29,7 +31,7 @@ def hive2carto(hivedb, hivetable, carto_username, carto_api_key):
         host = "https://{}.carto.com/".format(carto_username)
 
         context = cartoframes.CartoContext(
-                baseurl=host,
+                base_url=host,
                 api_key=carto_api_key,
                 session=session,
                 verbose=True
@@ -47,7 +49,6 @@ def hive2carto(hivedb, hivetable, carto_username, carto_api_key):
             'status': 'success',
             'table': "{host}/dataset/{tablename}".format(
                     host=host.strip('/'),
-                    username=carto_username,
                     tablename=hivetable
                 ),
              'code': 200
