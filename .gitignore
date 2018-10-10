@@ -112,3 +112,6 @@ tmp
 coverage-reports
 coverage*
 .DS_Store
+
+# CCSQ environment specific settings
+ccsq_environment.py

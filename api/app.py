@@ -1,7 +1,9 @@
-from flask import Flask, url_for, request, jsonify
+from flask import Flask
+from flask import url_for, request, jsonify, redirect
 from worker import celery
 import celery.states as states
 import logging
+import requests
 
 app = Flask(__name__)
 
@@ -33,11 +35,12 @@ def hive():
             args=[database, table, username, key],
             kwargs={}
         )
-    return jsonify({
-        'status': 'pending',
-        'task_id': task.id,
-        'status_url': url=url_for('check_task', task_id=task.id, external=True)
-    })
+    return redirect(url_for('check_task', task_id=task.id, external=True))
+    #return jsonify({
+    #    'status': 'pending',
+    #    'task_id': task.id,
+    #    'status_url': url_for('check_task', task_id=task.id, external=True)
+    #})
 
 @app.route('/check/<string:task_id>')
 def check_task(task_id):
@@ -46,3 +49,8 @@ def check_task(task_id):
         return jsonify({'state': res.state})
     else:
         return jsonify({'state': res.state, 'table_name': res.result})
+if __name__ == "__main__":
+    #app.run()
+    app.run(host='0.0.0.0', port=5000, debug=True)
+    #logging.info('Initializing Carto Hive Connector Service...')
+
