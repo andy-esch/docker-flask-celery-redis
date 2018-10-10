@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from celery import Celery
@@ -29,7 +30,7 @@ def hive2carto(hivedb, hivetable, carto_username, carto_api_key):
 
         context = cartoframes.CartoContext(
                 baseurl=host,
-                api_key=carto_api_key
+                api_key=carto_api_key,
                 session=session,
                 verbose=True
             )
