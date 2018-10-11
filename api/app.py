@@ -45,4 +45,4 @@ def check_task(task_id):
     if res.state == states.PENDING:
         return jsonify({'state': res.state})
     else:
-        return jsonify({'state': res.state, 'table_name': res.result})
+        return jsonify({'state': res.state, 'result': res.result})
